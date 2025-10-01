@@ -8,7 +8,7 @@ for Monkey_num=1:2
     displayFlag=0;
     stimulusPeriodS=[0.25 0.75];
     baselinePeriodS=[-0.5 0];
-    thresholdFraction=0.25;
+    thresholdFraction=0.5;
     num_iterations=120;
     dict_size=2500000;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,7 +74,7 @@ for Monkey_num=1:2
         %%%%%% Slow gamma burst computation %%%%%%
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,slow_gamma_freq);
         power_gatherer_sg(counter)=diffPower;
-        thresholdFactor=sqrt(thresholdFraction*diffPower);
+        thresholdFactor=thresholdFraction*sqrt(diffPower);
         [length_temp_sg,freq_temp_sg,time_center_temp_sg,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
         length_temp_all_trials=[];
         onset_temp_all_trials=[];
@@ -94,7 +94,7 @@ for Monkey_num=1:2
             % Find the first burst (in terms of time) in each trial
             % Onset time (earliest)
             onset_time_temp_trial_sg=time_center_temp_sg{ii}'-((length_temp_sg{ii}')*0.5);
-            % onset_time_temp_trial_sg(onset_time_temp_trial_sg<0)=0; % Ensuring onset time is not before stimulus presentation
+            % onset_time_temp_trial_sg(onset_time_temp_trial_sg<0)=[]; % Ensuring onset time is not before stimulus presentation
             onset_idx=(find((onset_time_temp_trial_sg)==min(onset_time_temp_trial_sg)));
             onset_temp_all_trials=[onset_temp_all_trials,onset_time_temp_trial_sg(onset_idx)]; 
         end
@@ -105,7 +105,7 @@ for Monkey_num=1:2
         %%%%%% Fast gamma burst computation %%%%%%
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,fast_gamma_freq);
         power_gatherer_fg(counter)=diffPower;
-        thresholdFactor=sqrt(thresholdFraction*diffPower);
+        thresholdFactor=thresholdFraction*sqrt(diffPower);
         [length_temp_fg,freq_temp_fg,time_center_temp_fg,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
         length_temp_all_trials=[];
         onset_temp_all_trials=[];
@@ -125,7 +125,7 @@ for Monkey_num=1:2
             % Find the first burst (in terms of time) in each trial
             % Onset time (earliest)
             onset_time_temp_trial_fg=time_center_temp_fg{ii}'-((length_temp_fg{ii}')*0.5);
-            % onset_time_temp_trial_fg(onset_time_temp_trial_fg<0)=0; % Ensuring onset time is not before stimulus presentation
+            % onset_time_temp_trial_fg(onset_time_temp_trial_fg<0)=[]; % Ensuring onset time is not before stimulus presentation
             onset_idx=(find((onset_time_temp_trial_fg)==min(onset_time_temp_trial_fg)));
             onset_temp_all_trials=[onset_temp_all_trials,onset_time_temp_trial_fg(onset_idx)]; 
         end

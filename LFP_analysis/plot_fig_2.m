@@ -8,7 +8,7 @@ for Monkey_num=1:2
     displayFlag=0;
     stimulusPeriodS=[0.25 0.75];
     baselinePeriodS=[-0.5 0];
-    thresholdFraction=0.25;
+    thresholdFraction=0.5;
     num_iterations=120;
     dict_size=2500000;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,10 +48,6 @@ for Monkey_num=1:2
     length_gatherer_fg=cell(1,num_elec);
     power_gatherer_sg=zeros(1,num_elec);
     power_gatherer_fg=zeros(1,num_elec);
-    amp_gatherer_sg=cell(1,num_elec);
-    amp_gatherer_fg=cell(1,num_elec);
-    tf_accum_sg=[];
-    tf_accum_fg=[];
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     for i=current_electrode
         if Monkey_num==1
@@ -70,35 +66,23 @@ for Monkey_num=1:2
         %%%%%% Slow gamma burst computation %%%%%%
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,slow_gamma_freq);
         power_gatherer_sg(counter)=diffPower;
-        % power_gatherer_sg(counter)= get_Power(data_temp, timeVals,stimulusPeriodS, slow_gamma_freq);
-        thresholdFactor=sqrt(thresholdFraction*diffPower);
-        tf_accum_sg=[tf_accum_sg,thresholdFactor];
-        % thresholdFactor=sqrt(thresholdFraction);
-        [length_temp_sg,~,~,~,~,a_temp_sg]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
+        thresholdFactor=thresholdFraction*sqrt(diffPower);
+        [length_temp_sg,~,~,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
         length_temp_all_trials=[];
-        a_temp_all_trials=[];
         for ii=1:length(length_temp_sg)
             length_temp_all_trials=[length_temp_all_trials,length_temp_sg{ii}'];
-            a_temp_all_trials=[a_temp_all_trials,a_temp_sg{ii}'];
         end
         length_gatherer_sg{counter}=length_temp_all_trials;
-        amp_gatherer_sg{counter}=a_temp_all_trials;
         %%%%%% Fast gamma burst computation %%%%%%
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,fast_gamma_freq);
         power_gatherer_fg(counter)=diffPower;
-        % power_gatherer_fg(counter)= get_Power(data_temp, timeVals,stimulusPeriodS, fast_gamma_freq);
-        thresholdFactor=sqrt(thresholdFraction*diffPower);
-        tf_accum_fg=[tf_accum_fg,thresholdFactor];
-        % thresholdFactor=sqrt(thresholdFraction);
-        [length_temp_fg,~,~,~,~,a_temp_fg]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
+        thresholdFactor=thresholdFraction*sqrt(diffPower);
+        [length_temp_fg,~,~,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
         length_temp_all_trials=[];
-        a_temp_all_trials=[]; 
         for ii=1:length(length_temp_fg)
             length_temp_all_trials=[length_temp_all_trials,length_temp_fg{ii}'];
-            a_temp_all_trials=[a_temp_all_trials,a_temp_fg{ii}'];
         end
         length_gatherer_fg{counter}=length_temp_all_trials;
-        amp_gatherer_fg{counter}=a_temp_all_trials;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         counter=counter+1;
     end
@@ -106,43 +90,30 @@ for Monkey_num=1:2
     length_all_elec_fg=[];
     median_gatherer_sg=zeros(1,num_elec);
     median_gatherer_fg=zeros(1,num_elec);
-    median_gatherer_sg_amp=zeros(1,num_elec);
-    median_gatherer_fg_amp=zeros(1,num_elec);
-    amp_all_elec_sg=[];
-    amp_all_elec_fg=[];
     for i=1:num_elec
         reject_idx=find(length_gatherer_sg{i}>0.8);
-        amp_gatherer_sg{i}(reject_idx)=[];
         reject_idx=find(length_gatherer_fg{i}>0.8);
-        amp_gatherer_fg{i}(reject_idx)=[];
         length_gatherer_sg{i}=length_gatherer_sg{i}(length_gatherer_sg{i}<0.8);
         length_gatherer_fg{i}=length_gatherer_fg{i}(length_gatherer_fg{i}<0.8);
         median_gatherer_sg(i)=median(length_gatherer_sg{i});
         median_gatherer_fg(i)=median(length_gatherer_fg{i});
-        median_gatherer_sg_amp(i)=median(amp_gatherer_sg{i});
-        median_gatherer_fg_amp(i)=median(amp_gatherer_fg{i});
         % if less than 20 bursts are detected for either slow or fast gamma, then exclude that electrode
         if ((length(length_gatherer_sg{i})<20) || (length(length_gatherer_fg{i})<20))
             median_gatherer_sg(i)=0;
             median_gatherer_fg(i)=0;
             power_gatherer_sg(i)=0;
             power_gatherer_fg(i)=0;
-            median_gatherer_sg_amp(i)=0;
-            median_gatherer_fg_amp(i)=0;
             continue;
         end
         length_all_elec_sg=[length_all_elec_sg,length_gatherer_sg{i}];
         length_all_elec_fg=[length_all_elec_fg,length_gatherer_fg{i}];
-        amp_all_elec_sg=[amp_all_elec_sg,amp_gatherer_sg{i}];
-        amp_all_elec_fg=[amp_all_elec_fg,amp_gatherer_fg{i}];
     end
     power_gatherer_sg=power_gatherer_sg(power_gatherer_sg~=0);
     power_gatherer_fg=power_gatherer_fg(power_gatherer_fg~=0);
     median_gatherer_sg=median_gatherer_sg(median_gatherer_sg~=0);
     median_gatherer_fg=median_gatherer_fg(median_gatherer_fg~=0);
-    median_gatherer_sg_amp=median_gatherer_sg_amp(median_gatherer_sg_amp~=0);
-    median_gatherer_fg_amp=median_gatherer_fg_amp(median_gatherer_fg_amp~=0);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Converting to dB scale
     power_gatherer_sg=10*log10(power_gatherer_sg);
     power_gatherer_fg=10*log10(power_gatherer_fg);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -161,7 +132,6 @@ for Monkey_num=1:2
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     subplot(plotHandles(Monkey_num,2));
-    % violin_swarm_plot(median_gatherer_sg,median_gatherer_fg);
     violin_swarm_plot_paired(median_gatherer_sg,median_gatherer_fg,0);
     if Monkey_num==1
        ylim([0 0.6])

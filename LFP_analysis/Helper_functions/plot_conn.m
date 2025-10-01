@@ -11,8 +11,6 @@ function plot_conn(method, plotHandles_1,plotHandles_2,idx)
             LFP_data_file=dir(fullfile(parent_file_path,'Decimated_8_LFP_data_alpa_H'));
             LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
             LFP_data_file = natsortfiles({LFP_data_file.name});
-            % slow_gamma_freq=[20 34];
-            % fast_gamma_freq=[34 65];
             if strcmp(method,'PLV')
                 load('M1_conn_analysis_PLV.mat');
                 slow_gamma_freq=[28 28];
@@ -34,8 +32,6 @@ function plot_conn(method, plotHandles_1,plotHandles_2,idx)
             LFP_data_file=dir(fullfile(parent_file_path,'Decimated_8_LFP_data_kesari_H'));
             LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
             LFP_data_file = natsortfiles({LFP_data_file.name});
-            % slow_gamma_freq=[20 40];
-            % fast_gamma_freq=[40 65];
             if strcmp(method,'PLV')
                 load('M2_conn_analysis_PLV.mat');
                 slow_gamma_freq=[20 20];

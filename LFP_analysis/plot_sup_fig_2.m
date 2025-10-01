@@ -8,7 +8,7 @@ for Monkey_num=1:2
     displayFlag=0;
     stimulusPeriodS=[0.25 0.75];
     baselinePeriodS=[-0.5 0];
-    thresholdFraction=0.25;
+    thresholdFraction=0.5;
     num_iterations=120;
     dict_size=2500000;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,7 +70,7 @@ for Monkey_num=1:2
             power_bl_fg(1,ORI)=log10(get_Power(data_temp,timeVals,baselinePeriodS,fast_gamma_freq));
             %%%%%%%% Slow gamma burst computation %%%%%%
             diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,slow_gamma_freq);
-            thresholdFactor=sqrt(thresholdFraction*diffPower);
+            thresholdFactor=thresholdFraction*sqrt(diffPower);
             [length_temp_sg,~,~,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
             length_temp_all_trials=[];
             for ii=1:length(length_temp_sg)
@@ -79,7 +79,7 @@ for Monkey_num=1:2
             length_gatherer_sg{ORI,counter}=length_temp_all_trials;
             %%%%%%%% Fast gamma burst computation %%%%%%
             diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,fast_gamma_freq);
-            thresholdFactor=sqrt(thresholdFraction*diffPower);
+            thresholdFactor=thresholdFraction*sqrt(diffPower);
             [length_temp_fg,~,~,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
             length_temp_all_trials=[];
             for ii=1:length(length_temp_fg)
