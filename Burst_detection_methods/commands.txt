@@ -1,0 +1,6 @@
+reinit -R 2500000 
+set -O 512 -M 120 -E 100 -F 250 -D 0.9 
+loadasc -O sig.txt
+mp
+save -S mpresults
+exit
