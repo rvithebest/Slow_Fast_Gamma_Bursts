@@ -14,4 +14,6 @@
 - Chronux toolbox (Mitra and Bokil, 2008) (http://chronux.org/, RRID: SCR_005547)
 - Fieldtrip Toolbox ((Oostenveld et al., 2011), RRID: SCR_004849)
 ## Code Structure
+## Data availability
+
 
