@@ -1,0 +1,16 @@
+load('Model_FG_3/simulationResults.mat');
+t = JSpop.EIpairs.t;
+rE = JSpop.EIpairs.R(1:end/2,:);
+rI = JSpop.EIpairs.R(end/2+1:end,:);
+t=t(1:end-1);
+lfp=lfp(:,1:end-1);
+t_sel_analysis = t>=0.25 & t<=1;
+lfp_fft_trialwise = abs(fft(lfp(:,t_sel_analysis),[],2));
+Fs=1/(t(2)-t(1));
+freq_axis=0:Fs/length(t(t_sel_analysis)):Fs*(1-1/length(t(t_sel_analysis)));
+mean_lfp_fft = mean(lfp_fft_trialwise, 1);
+plot(freq_axis, log10(mean_lfp_fft), 'LineWidth', 2,'Color', 'k');
+xlim([0 100]);
+xlabel('Frequency (Hz)');
+ylabel('log(Amplitude)');
+title('Mean LFP FFT');
