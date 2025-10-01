@@ -104,21 +104,6 @@ function MP_plot_model_sim(plotHandles,sg_idx,fg_idx,slow_gamma_freq,fast_gamma_
                     counter=counter+1;
                 end
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                if idx== sg_idx
-                    sgl_plot=[];
-                    sgl_plot=sg_l;
-                end
-                if idx== fg_idx
-                    fgl_plot=[];
-                    fgl_plot=fg_l;
-                end
-                % If sg_l or fg_l has less than 40 bursts, we do not analyze it
-                % if length(sg_l)<40 || length(fg_l)<40
-                %     median_sg_vals(idx)=0;
-                %     median_fg_vals(idx)=0;
-                %     power_sg_vals(idx)=0;
-                %     power_fg_vals(idx)=0;
-                % end
                 length_all_elec_sg=[length_all_elec_sg,sg_l];
                 length_all_elec_fg=[length_all_elec_fg,fg_l];
                 idx=idx+1;
@@ -136,16 +121,9 @@ function MP_plot_model_sim(plotHandles,sg_idx,fg_idx,slow_gamma_freq,fast_gamma_
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     subplot(plotHandles(2,2));
     hold on;
-    % xline(median(fgl_plot),'--','Color',[1 0.5 0],'LineWidth',2);
-    % xline(median(sgl_plot),'--','Color','b','LineWidth',2);
-    % histogram_all_burst(sgl_plot,fgl_plot,2,10);
     histogram_all_burst(length_all_elec_sg,length_all_elec_fg,2,10);
     xlim([0 2]);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % subplot(plotHandles(2,2));
-    % % Only for equal inputs- (8,8) for both the models
-    % plot_idx=2:length(input_vals):N;
-    % violin_swarm_plot_paired(median_sg_vals(plot_idx),median_fg_vals(plot_idx),0);
     subplot(plotHandles(1,3));
     violin_swarm_plot_paired(mean_o_sg_vals, mean_o_fg_vals,2);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -157,8 +135,6 @@ function MP_plot_model_sim(plotHandles,sg_idx,fg_idx,slow_gamma_freq,fast_gamma_
     scatter_plot_power_burst(power_sg_vals,power_fg_vals,median_sg_vals ...
         ,median_fg_vals,matched_sg_indices,matched_fg_indices,2);
     hold on;
-    % plot(power_sg_vals(sg_idx),median_sg_vals(sg_idx),'o','MarkerFaceColor','k','MarkerEdgeColor','k','MarkerSize',5);
-    % plot(power_fg_vals(fg_idx),median_fg_vals(fg_idx),'o','MarkerFaceColor','k','MarkerEdgeColor','k','MarkerSize',5);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     subplot(plotHandles(2,4));
     matched_sg_lengths= median_sg_vals(matched_sg_indices);

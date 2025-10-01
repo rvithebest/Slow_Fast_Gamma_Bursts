@@ -3,11 +3,11 @@ f=figure;
 f.WindowState="Maximized";
 plotHandles_1=getPlotHandles(2,1,[0.01 0.08 0.3 0.9],0.07,0.09,0);
 plotHandles_2=getPlotHandles(2,4,[0.4 0.08 0.58 0.9],0.05,0.09,0);
-% load('Model_sim_SG_theta_64_1_input_14\MP_analysis_results.mat');
 load('Model_sim_SG_theta_64_4_input_14\MP_analysis_results.mat');
 LFP_sg=lfp_decimated;
-% load('Model_sim_FG_theta_4_1_input_7\MP_analysis_results.mat');
 load('Model_sim_FG_theta_16_1_input_7\MP_analysis_results.mat');
+% Representative parametric conditions
+% For confirming the generation of sg and fg oscillations
 LFP_fg=lfp_decimated;
 timeVals=timeVals_decimated;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -26,8 +26,6 @@ sg_freq=[20 40]; fg_freq=[40 80];
 Model_TF_plot(LFP_sg,timeVals,1,plotHandles_2,sg_freq);
 Model_TF_plot(LFP_fg,timeVals,2,plotHandles_2,fg_freq);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% theta_E_sg=64; theta_I_sg=1; input_sg=14;
-% theta_E_fg=4; theta_I_fg=1; input_fg=7;
 theta_E_sg=16; theta_I_sg=1; input_sg=14;
 theta_E_fg=16; theta_I_fg=1; input_fg=7;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
