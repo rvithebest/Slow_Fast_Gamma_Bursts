@@ -1,6 +1,4 @@
 length_injected=[0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4];
-% load('LFP_synth_gamma_all_methods_elec41_ORI_45.mat'); % MP, OMP-GEAR
-% load('LFP_synth_gamma_rest_methods_elec41_ORI_45.mat'); % Hilbert-Transform, Wavelet-transform, Feingold Algorithm
 load('LFP_synth_gamma_all_methods_elec41_ORI_all_SF_1cpd.mat');
 load('timeVals.mat')
 f=figure;
@@ -9,18 +7,8 @@ plotHandles_1=getPlotHandles(1,1,[0.06 0.08 0.35 0.55],0.04,0.08,0);
 plotHandles_2=getPlotHandles(2,1,[0.06 0.7 0.35 0.28],0.04,0.01,0);
 plotHandles_3=getPlotHandles(3,1,[0.48 0.55 0.46 0.43],0.04,0.05,0);
 plotHandles_4=getPlotHandles(1,1,[0.48 0.08 0.46 0.4],0.04,0.08,0);
-% Raw LFP Trace as well
-% plotHandles_1=getPlotHandles(1,1,[0.06 0.08 0.35 0.61],0.04,0.08,0);
-% plotHandles_2=getPlotHandles(1,1,[0.06 0.77 0.35 0.18],0.04,0.04,0);
-% plotHandles_3=getPlotHandles(3,1,[0.48 0.55 0.46 0.43],0.04,0.05,0);
-% plotHandles_4=getPlotHandles(1,1,[0.48 0.08 0.46 0.4],0.04,0.08,0);
-% Below plot handles for altenrate figure-1 
-% plotHandles=getPlotHandles(3,1,[0.06 0.06 0.2 0.92],0.04,0.08,0);
-% plotHandles_2=getPlotHandles(3,1,[0.32 0.55 0.6 0.43],0.04,0.03,0);
-% plotHandles_3=getPlotHandles(1,1,[0.32 0.06 0.6 0.45],0.04,0.08,0);
-% Can include RAW LFP Trace
 % Analysis of the performance of the algorithms
-% OMP-GEAR- only first column
+% OMP-GEAR
 median_length_OMP_gear_t_1=zeros(1,8);
 SEM_length_OMP_gear_t_1=zeros(1,8);
 for i=1:8
@@ -29,7 +17,7 @@ for i=1:8
     median_length_OMP_gear_t_1(i)=median(length_accumulator_omp_gear{i,1});
     SEM_length_OMP_gear_t_1(i)=getSEMedian(length_accumulator_omp_gear{i,1}); 
 end
-% MP- only first column
+% MP
 median_length_MP_t_1=zeros(1,8);
 SEM_length_MP_t_1=zeros(1,8);
 for i=1:8
@@ -38,7 +26,7 @@ for i=1:8
     median_length_MP_t_1(i)=median(length_accumulator_MP{i,1});
     SEM_length_MP_t_1(i)=getSEMedian(length_accumulator_MP{i,1},1000); 
 end
-% Hilbert- only first column
+% Hilbert
 median_length_hilbert_t_1=zeros(1,8);
 SEM_length_hilbert_t_1=zeros(1,8);
 for i=1:8
@@ -47,39 +35,14 @@ for i=1:8
     median_length_hilbert_t_1(i)=median(length_accumulator_hilbert{i,1});
     SEM_length_hilbert_t_1(i)=getSEMedian(length_accumulator_hilbert{i,1},1000); 
 end
-% Wavelet- only first column
-median_length_wavelet_t_1=zeros(1,8);
-SEM_length_wavelet_t_1=zeros(1,8);
-for i=1:8
-    % Filter lengths less than 0.8
-    length_accumulator_wavelet{i,1}(length_accumulator_wavelet{i,1}>0.8)=[];
-    median_length_wavelet_t_1(i)=median(length_accumulator_wavelet{i,1});
-    SEM_length_wavelet_t_1(i)=getSEMedian(length_accumulator_wavelet{i,1},1000); 
-end
-% Feingold Algorithm- only first column
-median_length_feingold_t_1=zeros(1,8);
-SEM_length_feingold_t_1=zeros(1,8);
-for i=1:8
-    % Filter lengths less than 0.8
-    length_accumulator_feingold{i,1}(length_accumulator_feingold{i,1}>0.8)=[];
-    median_length_feingold_t_1(i)=median(length_accumulator_feingold{i,1});
-    SEM_length_feingold_t_1(i)=getSEMedian(length_accumulator_feingold{i,1},1000); 
-end
 % Plot the results
 subplot(plotHandles_1(1,1))
 hold on;
-% 'm'- MP
 errorbar(length_injected,median_length_OMP_gear_t_1,SEM_length_OMP_gear_t_1,'-^','LineWidth',2,'Color', 'b');
-% 'g'- OMP-GEAR
 hold on;
 errorbar(length_injected,median_length_hilbert_t_1,SEM_length_hilbert_t_1,'-s','LineWidth',2,'Color', [0.58, 0.0, 0.83]);
-% [0.58, 0.0, 0.83]- Hilbert
 hold on;
-% errorbar(length_injected,median_length_wavelet_t_1,SEM_length_wavelet_t_1,'-d','LineWidth',2,'Color',[0.23,0.51,0]);
-% hold on;
 errorbar(length_injected,median_length_MP_t_1,SEM_length_MP_t_1,'-o','LineWidth',2,'Color', 'r');
-% hold on;
-% errorbar(length_injected,median_length_feingold_t_1,SEM_length_feingold_t_1,'-x','LineWidth',2,'Color', 'b');
 % plot y=x line (plane)- black color
 plot([0 0.42],[0 0.42],'--k','LineWidth',0.7);
 xlabel('Injected length (s)');
@@ -92,26 +55,17 @@ h3.FitBoxToText = 'on';
 % set gca font size to 18
 % set(gca,'FontSize',18);
 % Calculate R^2 values
-% mdl = fitlm(length_injected, median_length_OMP_gear_t_1, 'RobustOpts', 'on');
 [R_squared_OMP, RMSE_OMP] = compute_R_squared_val(length_injected, median_length_OMP_gear_t_1);
-% R_squared_omp = mdl.Rsquared.Ordinary;
-% mdl=fitlm(length_injected, median_length_MP_t_1, 'RobustOpts', 'on');
 [R_squared_MP, RMSE_MP] = compute_R_squared_val(length_injected, median_length_MP_t_1);
-% R_squared_mp = mdl.Rsquared.Ordinary;
-% mdl=fitlm(length_injected, median_length_hilbert_t_1,'RobustOpts', 'on');
 [R_squared_hilbert, RMSE_hilbert] = compute_R_squared_val(length_injected, median_length_hilbert_t_1);
-% R_squared_hilbert=mdl.Rsquared.Ordinary;
-% mdl=fitlm(length_injected, median_length_wavelet_t_1);
-% R_squared_wavelet=mdl.Rsquared.Ordinary;
 disp(['R^2 value for OMP-GEAR is ',num2str(R_squared_OMP)]);
 disp(['R^2 value for MP is ',num2str(R_squared_MP)]);
 disp(['R^2 value for Hilbert is ',num2str(R_squared_hilbert)]);
 disp(['RMSE value for OMP-GEAR is ',num2str(RMSE_OMP)]);
 disp(['RMSE value for MP is ',num2str(RMSE_MP)]);
 disp(['RMSE value for Hilbert is ',num2str(RMSE_hilbert)]);
-% disp(['R^2 value for Wavelet is ',num2str(R_squared_wavelet)]);
 % generate a power spectral density plot of analogData_accumulator{6,1}, analogData_accumulator{6,2} using chronux toolbox
-% for the injected length of 0.3
+% for the injected length of 0.3 sec (representiative plot)
 params.Fs=250;
 params.fpass=[0 100];
 params.tapers=[1 1];
@@ -132,14 +86,11 @@ plot(f0,log10(S0),'LineWidth',2,'Color',[0.23,0.51,0.00]);
 ylabel("Raw Power");
 % remove Xticks
 set(gca,'XTick',[]);
-
-% h2=annotation("textbox",[.004 .54 .1 .1],'String','B','FontSize',24,'FontWeight','Bold','EdgeColor','none','FontName','Helvetica');
-% h2.FitBoxToText = 'on';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 subplot(plotHandles_2(2,1));
 s1_index_bl=find(timeVals>=-0.5,1);
 s2_index_bl=find(timeVals>=0,1);
-[S_bl,f_bl]=mtspectrumc(analogData_accumulator{select_index,1}(:,s1_index_bl:s2_index_bl)',params);
+% [S_bl,f_bl]=mtspectrumc(analogData_accumulator{select_index,1}(:,s1_index_bl:s2_index_bl)',params);
 [S0_bl,f0_bl]=mtspectrumc(analogData_accumulator{select_index,2}(:,s1_index_bl:s2_index_bl)',params);
 % plot(f,10*log10(S./S_bl),'LineWidth',2,'Color','k');
 plot(f,10*log10(S./S0),'LineWidth',2,'Color','k');
@@ -160,9 +111,6 @@ load(fullfile(parent_file_path,'alpaH_info','badTrials.mat'));
 load(fullfile(parent_file_path,'alpaH_info','alpaHMicroelectrodeRFData.mat'));
 % LFP_data file is loaded
 LFP_data_file=dir(fullfile(parent_file_path,"Decimated_8_LFP_data_alpa_H"));
-% LFP_non_decimated_path="C:\Users\rviiy\OneDrive - Indian Institute of Science\gamma_length_project_EEG_SRAYlab\data\alpaH\Microelectrode\210817\GRF_002\segmentedData\LFP\elec41.mat";
-% load(LFP_non_decimated_path);
-% timeVals_non_decimated_path="C:\Users\rviiy\OneDrive - Indian Institute of Science\gamma_length_project_EEG_SRAYlab\data\alpaH\Microelectrode\210817\GRF_002\segmentedData\LFP\lfpInfo.mat";
 load('gamma_duration_alpaH_MP.mat');
 % natrisort the LFP data-remain in form of struct
 LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'})); %remove . and ..
@@ -183,9 +131,9 @@ electrode_num=length(selected_elec_LFP);
 % 32- possible elec
 selected_elec_pos=37;
 i=selected_elec_LFP(selected_elec_pos);
-load(fullfile('Decimated_8_LFP_Data_alpa_H',LFP_data_file{i}));%analogDataDecimatedDecimated
+load(fullfile('Decimated_8_LFP_Data_alpa_H',LFP_data_file{i})); %analogDataDecimatedDecimated
 load('timeVals.mat')
-trial_temp=[parameterCombinations{:,:,:,2,9}];
+trial_temp=[parameterCombinations{:,:,:,2,9}]; % 2: 1 cpd, 9: All 8 orientations combined
 trial_temp=setdiff(trial_temp,badTrials);
 LFP_signal=analogDataDecimated(trial_temp,:);
 Fs=250;
@@ -252,33 +200,19 @@ trial=1; % first trial of SF- 1 cpd and 45 deg
     LFP_signal_one_trial_fg=filtfilt(b,a,LFP_signal_one_trial);
     % plot the signal
     %%%%%%%%%%%%%%%%%%%%%%% SLOW GAMMA %%%%%%%%%%%%%%%%%%%
-    % load(timeVals_non_decimated_path);
     subplot(plotHandles_3(3,1));
-    % subplot(plotHandles_2(2,1));
     plot(timeVals,LFP_signal_one_trial_sg,'-b');
     ylim([min(LFP_signal_one_trial_sg)+5,max(LFP_signal_one_trial_sg)+5])
     % Keepeing the y-axis same (of both fast gamma and slow gamma) for better comparison
-    % Fast gamma has a higher amplitude than slow gamma (for this particular trial)
-    % ylim([min(LFP_signal_one_trial_fg)-5,max(LFP_signal_one_trial_fg)+5])
     hold on;
-    % set(gca,'FontSize',18);
-    %plot(timeVals,LFP_signal_one_trial,'-k');
-
-    % title('Slow gamma- sample trial- Bursts estimation by MP');
     %%%%%%%%%%%%%%%%%%%%% FAST GAMMA %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     subplot(plotHandles_3(2,1));
-    % subplot(plotHandles_2(1,1));
     plot(timeVals,LFP_signal_one_trial_fg,'-','Color',color_orange);
-    % ylim([min(LFP_signal_one_trial_fg)-5,max(LFP_signal_one_trial_fg)+5])
     ylim([min(LFP_signal_one_trial_sg)+5,max(LFP_signal_one_trial_sg)+5])
     hold on;
     ylabel("Amplitude(\muV)")
-    % set(gca,'FontSize',18);
-    % title('Fast gamma- sample trial- Bursts estimation by MP');
     %%%%%%%%%%%%%%%%%%%% LFP signal %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     subplot(plotHandles_3(1,1));
-    % plot(timeVals,LFP_signal_one_trial,'-k');
-    % load(timeVals_non_decimated_path);
     plot(timeVals,LFP_signal_one_trial,'-k','LineWidth',1.5);
     ylim([min(LFP_signal_one_trial)-10,max(LFP_signal_one_trial)+10])
     xlim([0 1]);
@@ -375,18 +309,10 @@ trial=1; % first trial of SF- 1 cpd and 45 deg
     h5=annotation("textbox",[0.43 0.38 .1 .1],'String','D','FontSize',24,'FontWeight','Bold','EdgeColor','none','FontName','Helvetica');
     h5.FitBoxToText = 'on';
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %title(['MP- Sample Trial - ',num2str(trial)])
     axis([0 1 0 85]);
     xlabel('Time(s)')
     ylabel('Frequency(Hz)')
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % set_axis_ticks_fontsize(plotHandles_1,22,18,1);
-    % set_axis_ticks_fontsize(plotHandles_2,22,18,1);
-    % set_axis_ticks_fontsize(plotHandles_2,22,18,2);
-    % set_axis_ticks_fontsize(plotHandles_3,22,18,1);
-    % set_axis_ticks_fontsize(plotHandles_3,22,18,2);
-    % set_axis_ticks_fontsize(plotHandles_3,22,18,3);
-    % set_axis_ticks_fontsize(plotHandles_4,22,18,1);
     set_axis_ticks_fontsize(plotHandles_1,16,14,1);
     set_axis_ticks_fontsize(plotHandles_2,16,14,1);
     set_axis_ticks_fontsize(plotHandles_2,16,14,2);
