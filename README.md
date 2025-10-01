@@ -1,4 +1,4 @@
-# Differential burst dynamics of slow and fast gamma in Macaque V1
+# Differential Burst dynamics of Slow and Fast gamma rhythms in Macaque V1
 - Computed burst durations of slow and fast gamma (stimulus induced) produced in LFP recorded from V1 of two awake adult feamle monkeys
 - Employed MP, OMP-GEAR, and HT to estimate burst durations
 - Measured functional connectivity (PLV and WPLI) across all pair of electrodes
