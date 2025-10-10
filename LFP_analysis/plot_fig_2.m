@@ -18,7 +18,7 @@ for Monkey_num=1:2
         load((fullfile(parent_file_path,'alpaH_info','parameterCombinations.mat')))
         load(fullfile(parent_file_path,'alpaH_info','badTrials.mat'));
         load(fullfile(parent_file_path,'alpaH_info','alpaHMicroelectrodeRFData.mat'));
-        LFP_data_file=dir(fullfile(parent_file_path,'Decimated_8_LFP_data_alpa_H'));
+        LFP_data_file=dir(fullfile(parent_file_path,'LFP_data_alpa_H'));
         LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
         LFP_data_file = natsortfiles({LFP_data_file.name});
         slow_gamma_freq=[20 32];
@@ -32,7 +32,7 @@ for Monkey_num=1:2
         load((fullfile(parent_file_path,'kesariH_info','parameterCombinations.mat')))
         load(fullfile(parent_file_path,'kesariH_info','badTrials.mat'));
         load(fullfile(parent_file_path,'kesariH_info','kesariHMicroelectrodeRFData.mat'));
-        LFP_data_file=dir(fullfile(parent_file_path,'Decimated_8_LFP_data_kesari_H'));
+        LFP_data_file=dir(fullfile(parent_file_path,'LFP_data_kesari_H'));
         LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
         LFP_data_file = natsortfiles({LFP_data_file.name});
         slow_gamma_freq=[20 38];
