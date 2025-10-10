@@ -18,7 +18,7 @@ for Monkey_num=1:2
         load((fullfile(parent_file_path,'alpaH_info','parameterCombinations.mat')))
         load(fullfile(parent_file_path,'alpaH_info','badTrials.mat'));
         load(fullfile(parent_file_path,'alpaH_info','alpaHMicroelectrodeRFData.mat'));
-        LFP_data_file=dir(fullfile(parent_file_path,'Decimated_8_LFP_data_alpa_H'));
+        LFP_data_file=dir(fullfile(parent_file_path,'LFP_data_alpa_H'));
         LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
         LFP_data_file = natsortfiles({LFP_data_file.name});
         slow_gamma_freq=[20 32];
@@ -29,9 +29,9 @@ for Monkey_num=1:2
         % Monkey- kesariH
         load('gamma_duration_kesariH_OMP_GEAR.mat');
         load((fullfile(parent_file_path,'kesariH_info','parameterCombinations.mat')))
-        load(fullfile(parent_file_path,'kesariH_info','badTrials_kesari.mat'));
-        load(fullfile(parent_file_path,'kesariH_info','kesariHMicroelectrodeRFData_Two.mat'));
-        LFP_data_file=dir(fullfile(parent_file_path,'Decimated_8_LFP_data_kesari_H'));
+        load(fullfile(parent_file_path,'kesariH_info','badTrials.mat'));
+        load(fullfile(parent_file_path,'kesariH_info','kesariHMicroelectrodeRFData.mat'));
+        LFP_data_file=dir(fullfile(parent_file_path,'LFP_data_kesari_H'));
         LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
         LFP_data_file = natsortfiles({LFP_data_file.name});
         slow_gamma_freq=[20 38];
@@ -60,12 +60,12 @@ for Monkey_num=1:2
     %%% for se start karna hai
     for i=current_electrode
         if Monkey_num==1
-            load(fullfile(parent_file_path,'Decimated_8_LFP_data_alpa_H',LFP_data_file{i}))
+            load(fullfile(parent_file_path,'LFP_data_alpa_H',LFP_data_file{i}))
             gabor_temp=gabor_accumulator{1,1,counter};
             header_temp=header_accumulator{1,1,counter};
         end
         if Monkey_num==2
-            load(fullfile(parent_file_path,'Decimated_8_LFP_data_kesari_H',LFP_data_file{i}))
+            load(fullfile(parent_file_path,'LFP_data_kesari_H',LFP_data_file{i}))
             gabor_temp=gabor_accumulator{1,8,counter};
             header_temp=header_accumulator{1,8,counter};
         end

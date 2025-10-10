@@ -19,5 +19,5 @@
 - Model_simulation: Used to simulate non-linear self oscillating WC model to generate slow and fast gamma rhythms
 - Model_analysis: Analysis of simulated LFP dataset (from model)
 ## Data availability
-
+- The entire LFP-dataset of the two monkeys- Monkey-1 (alpaH) and Monekey-2 (kesariH) is available in the data folder.
 

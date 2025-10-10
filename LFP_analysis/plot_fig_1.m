@@ -110,7 +110,7 @@ load(fullfile(parent_file_path,'alpaH_info','badTrials.mat'));
 % selected electrode file is loaded-RF data file
 load(fullfile(parent_file_path,'alpaH_info','alpaHMicroelectrodeRFData.mat'));
 % LFP_data file is loaded
-LFP_data_file=dir(fullfile(parent_file_path,"Decimated_8_LFP_data_alpa_H"));
+LFP_data_file=dir(fullfile(parent_file_path,"LFP_data_alpa_H"));
 load('gamma_duration_alpaH_MP.mat');
 % natrisort the LFP data-remain in form of struct
 LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'})); %remove . and ..
@@ -131,7 +131,7 @@ electrode_num=length(selected_elec_LFP);
 % 32- possible elec
 selected_elec_pos=37;
 i=selected_elec_LFP(selected_elec_pos);
-load(fullfile('Decimated_8_LFP_Data_alpa_H',LFP_data_file{i})); %analogDataDecimatedDecimated
+load(fullfile('LFP_Data_alpa_H',LFP_data_file{i})); %analogDataDecimatedDecimated
 load('timeVals.mat')
 trial_temp=[parameterCombinations{:,:,:,2,9}]; % 2: 1 cpd, 9: All 8 orientations combined
 trial_temp=setdiff(trial_temp,badTrials);
