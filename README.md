@@ -14,8 +14,8 @@
 - Chronux toolbox (Mitra and Bokil, 2008) (http://chronux.org/, RRID: SCR_005547)
 - Fieldtrip Toolbox ((Oostenveld et al., 2011), RRID: SCR_004849)
 - Download the following the repositories (previous studies from our lab) and add to your path:
-        - https://github.com/avianand8/GammaLengthProjectCodes.git
-        - https://github.com/RKrishnakumaran/NeOLab-WC-models.git
+  - https://github.com/avianand8/GammaLengthProjectCodes.git
+  - https://github.com/RKrishnakumaran/NeOLab-WC-models.git
 ## Code Structure
 - Burst_detection_methods: Codes to estimate burst dynamics of slow and fast gamma, using MP, OMP-GEAR and HT.
 - LFP_analysis: Codes for plotting the figures and complete analysis of estimated burst duration and latencies.
