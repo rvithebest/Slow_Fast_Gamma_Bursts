@@ -29,7 +29,7 @@ numTrials=size(analogData,1);
 diffPower = getChangeInPower(analogData,timeVals,stimulusPeriodS,baselinePeriodS,burstFreqRangeHz);
 % thresholdFactor=0.38*sqrt(diffPower);-optimized threshold for
 % synthetic_data_fourier(Decimated EEG data-good performance
-thresholdFactor=sqrt(diffPower*thresholdFraction);
+thresholdFactor=sqrt(diffPower*thresholdFraction); % default threhsold
 % [length_measured,~,~,~] = getBurstLength_all(analogData(i,:),timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,burstFreqRangeHz,50,0.9,[],[],[],"OMP-MAGE");
 [length_measured,freqList,timeList,gaborInfo,header,modList]= getBurstLength_all(analogData,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,burstFreqRangeHz,120,0.9,1500000,[],[],'OMP-GEAR');
 % length_gatherer = [length_gatherer, length_measured{1,1}', length_measured{1,2}', length_measured{1,3}'];   

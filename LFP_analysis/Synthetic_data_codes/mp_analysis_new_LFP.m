@@ -10,18 +10,16 @@ length_injected=[0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4];
 for v = 1 % only once first 
     for jj=1:8
         clearvars -except v length_accumulator_omp_gear gabor_accmulator_omp_gear length_injected jj length_accumulator_MP gabor_accmulator_MP length_accumulator_hilbert analogData_accumulator length_accumulator_wavelet length_accumulator_feingold;
-        % [analogData, timeVals, analogData0] = synthetic_data_LFP_new(length_injected(jj));
-        % load the following file- "synth_data_length_pos_jj.mat"
-        load(['synth_data_length_pos_', num2str(jj), '.mat']);
+        [analogData, timeVals, analogData0] = synthetic_data_LFP(length_injected(jj));
         MP_length_all_trials;   
         %%%%%%%%%%%%%%%%%%%%%%%%%% OMP-GEAR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        length_accumulator_omp_gear{jj,1} = [length_accumulator_omp_gear{jj,1}, length_gatherer];
+        length_accumulator_omp_gear{jj,1} = [length_accumulator_omp_gear{jj,1}, length_gatherer]; % default threshold used for analysis
         length_accumulator_omp_gear{jj,2} = [length_accumulator_omp_gear{jj,2}, length_gatherer_beta];
         length_accumulator_omp_gear{jj,3} = [length_accumulator_omp_gear{jj,3}, length_gatherer_gamma];
         length_accumulator_omp_gear{jj,4} = [length_accumulator_omp_gear{jj,4}, length_gatherer_delta];
         gabor_accmulator_omp_gear{jj,1}=gaborInfo_current;
         %%%%%%%%%%%%%%%% MP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        length_accumulator_MP{jj,1} = [length_accumulator_MP{jj,1}, length_gatherer_MP];
+        length_accumulator_MP{jj,1} = [length_accumulator_MP{jj,1}, length_gatherer_MP]; % \
         length_accumulator_MP{jj,2} = [length_accumulator_MP{jj,2}, length_gatherer_MP_beta];
         length_accumulator_MP{jj,3} = [length_accumulator_MP{jj,3}, length_gatherer_MP_gamma];
         length_accumulator_MP{jj,4} = [length_accumulator_MP{jj,4}, length_gatherer_MP_delta];

@@ -9,32 +9,25 @@ function [analogData,timeVals,analogData0] = synthetic_data_LFP(burstLen)
     %%%%%% BROAD GAMMA RANGE %%%%%%%%%%%%%%%%%%%%
     gammaRange = [20 65];          
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % numBurstsPerTrial=1;           
-    % if burstLen<0.15
     numBurstsPerTrial=[];
     if burstLen>0.25
         numBurstsPerTrial=1; %makes sure that burst is injected
     end
     % end
     % Get Real Data
-    % We select electrode number 8
-    % ORI=157.5 deg and SF=1 cpd and 4 cpd 
     % Corresponding trials are taken
-    load("Decimated_8_LFP_data_alpa_H\deci_elec_41.mat")
-    load("Decimated_8_LFP_data_alpa_H\timeVals_decimated.mat")
+    load("LFP_data_alpa_H\deci_elec_41.mat")
+    load("LFP_data_alpa_H\timeVals_decimated.mat")
     timeVals=timeVals_decimated;
     % load the parameterCombinations.mat file which gives the 'SF' and 'ORI' information
     load("alpaH_info\parameterCombinations.mat");
     %badtrials file is loaded
     load("alpaH_info\badTrials.mat");
-    trial_pos=(parameterCombinations{:,:,:,2,9});
-    % trial_pos_2=(parameterCombinations{:,:,:,3,3});
-    % trial_pos_3=(parameterCombinations{:,:,:,4,3});
-    % slow_gamma_pos=[trial_pos_1,trial_pos_2,trial_pos_3];
+    trial_pos=(parameterCombinations{:,:,:,2,9});% SF-1 cpd, all ORI
     trials_selected=setdiff(trial_pos,badTrials);
     LFP_data=analogDataDecimated(trials_selected,:);
-    bl= LFP_data(:,84:211);
-    st = LFP_data(:,274:401);
+    bl= LFP_data(:,84:211); % -0.5 to 0 seconds
+    st = LFP_data(:,274:401); % 0.25 to 0.75 seconds
     fft_bl=fft(bl,[],2);
     ang_fft_bl=angle(fft_bl);
     abs_fft_bl=abs(fft_bl);
@@ -62,7 +55,6 @@ function [analogData,timeVals,analogData0] = synthetic_data_LFP(burstLen)
     random_phase(:, 1) = 0;
     random_phase(:, half_points) = 0;
     random_phase(:, 2:half_points-1) = 2 * pi * rand(num_trials, half_points - 2) - pi;
-    
     % keep  the phase of the original signal for the original points-(5,9,13,....,509)
     for i = 1:num_trials
         k=2;
@@ -114,7 +106,7 @@ function [analogData,timeVals,analogData0] = synthetic_data_LFP(burstLen)
     fft_LFP=fft(LFP_data,[],2);
     fft_spontaneous(:,1)=fft_LFP(:,1);% matches the DC
     spontaneous_signal=ifft(fft_spontaneous,[],2);
-    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     analogData0 = spontaneous_signal;
     analogData = analogData0 + burstSignal;
     fft_synth_st=mean(abs(fft(analogData(:, stPos), [], 2)));
@@ -125,7 +117,6 @@ function [analogData,timeVals,analogData0] = synthetic_data_LFP(burstLen)
     gammaPowerST = sum(mFFTst(fPos).^2);
     gammaPowerSynth = sum(fft_synth_st(fPos).^2);
     scalingFactor = (0.7)*sqrt(gammaPowerST/gammaPowerSynth);
-    % scalingFactor=scalingFactor*0.5;
     analogData = analogData0 + (scalingFactor)*burstSignal;
     if displayFlag
         figure;
