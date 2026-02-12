@@ -1,4 +1,4 @@
-function generate_WC_OU_model_gamma(indicator,folder_name,theta_E,theta_I)
+function generate_WC_OU_model_gamma(indicator,folder_name,theta_E,theta_I,input_E,input_I)
 % folder_name='Model_SG_OU_noise_SOM_2';
 basefolder = pwd();
 savedir = fullfile(basefolder, folder_name); mkdir(savedir);
@@ -7,8 +7,8 @@ niterations = 50;
 iters = 1:niterations;
 thetasigma_multipliers = [[1,1]];
 uniqmultids = 1:size(thetasigma_multipliers,1);
-uniqE0=8;
-uniqI0=8;
+uniqE0=input_E;
+uniqI0=input_I;
 %% unwrap parameter combinations
 t = -2.047:2e-5:2.048;
 % t = -0.8475:2e-5:1.1965;
@@ -28,7 +28,6 @@ simulationfilename = fullfile(savedir,'simulationResults.mat');
 %%%%%%%%%%%%%%
 inputVal = {E0, I0};
 baselineinputAmp = {0*E0, 0*I0};
-
 ipdc = {0*E0, 0*I0}; % dc offset value for sinusoid
 
 % Consider 2 intervals : [baseline, stimulus]
