@@ -20,7 +20,6 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
         fast_gamma_freq=[36 65];
         gabor_accumulator=gaborInfo_accumulator_alpaH;
         header_accumulator=header_accumulator_alpaH;
-        load('MP_TF_vals_M1.mat');
     elseif Monkey_num==2
         % Monkey- kesariH
         load('gamma_duration_kesariH_MP.mat')
@@ -34,7 +33,6 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
         fast_gamma_freq=[42 65];
         gabor_accumulator=gaborInfo_accumulator_kesariH;
         header_accumulator=header_accumulator_kesariH;
-        load('MP_TF_vals_M2.mat');
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     load('timeVals.mat')
@@ -44,10 +42,10 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
     PSD_gatherer_fg_burst=zeros(size(freq_gatherer_fg_burst));
     random_PSD_gatherer_sg_burst=zeros(size(freq_gatherer_sg_burst));
     random_PSD_gatherer_fg_burst=zeros(size(freq_gatherer_fg_burst));
-    % freq_gatherer_sg_burst=[];
-    % freq_gatherer_fg_burst=[];
-    % E_TF_MP_gatherer=cell(1,num_elec);
-    % E_avg_MP_gatherer=cell(1,num_elec);
+    freq_gatherer_sg_burst=[];
+    freq_gatherer_fg_burst=[];
+    E_TF_MP_gatherer=cell(1,num_elec);
+    E_avg_MP_gatherer=cell(1,num_elec);
     trial_idx_sg=1;
     trial_idx_fg=1;
     for i=current_electrode
@@ -68,8 +66,8 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,slow_gamma_freq);
         thresholdFactor=sqrt(thresholdFraction*diffPower);
         [length_temp_sg,freq_temp_sg,time_center_temp_sg,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
-        % [meanE,freqVals]=getEnergyMP3p1(gabor_temp,header_temp,timeVals);
-        % E_avg_MP_gatherer{counter}=meanE;
+        [meanE,freqVals]=getEnergyMP3p1(gabor_temp,header_temp,timeVals);
+        E_avg_MP_gatherer{counter}=meanE;
         meanE=E_avg_MP_gatherer{counter};
         threshold_pow=10^(-16);
         meanE(meanE<threshold_pow)=threshold_pow;
@@ -77,12 +75,11 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
         bl_idx_1=find(timeVals>=baselinePeriodS(1),1);
         bl_idx_2=find(timeVals<baselinePeriodS(2),1,'last');
         bl_avg=mean(meanE(:,bl_idx_1:bl_idx_2),2);
-        % E_TF_MP_gatherer{counter}=cell(1,length(length_temp_sg));
+        E_TF_MP_gatherer{counter}=cell(1,length(length_temp_sg));
         for ii=1:length(length_temp_sg)
-            % E=mp2tf(squeeze(gabor_temp(ii,:,:)),header_temp(ii,:));
+            E=mp2tf(squeeze(gabor_temp(ii,:,:)),header_temp(ii,:));
             % E= 256 (freq vals) x 512 (time vals)
-            % E_TF_MP_gatherer{counter}{ii}=E;
-            E=E_TF_MP_gatherer{counter}{ii};
+            E_TF_MP_gatherer{counter}{ii}=E;
             E(E<threshold_pow)=threshold_pow;
             if isempty(length_temp_sg{ii}')
                 continue;
@@ -94,14 +91,13 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
             num_bursts=length(time_center_temp_sg{ii});
             for jj=1:num_bursts
                 [~,time_idx]=min(abs(timeVals-time_center_temp_sg{ii}(jj)));
-                % PSD_gatherer_sg_burst=[PSD_gatherer_sg_burst,E(:,time_idx)];
                 PSD_gatherer_sg_burst(:,trial_idx_sg)=10*(log10(E(:,time_idx))-bl_avg);
                 % Generate a random time point within the stimulus period
                 random_time_center=stimulusPeriodS(1) + (stimulusPeriodS(2) - stimulusPeriodS(1)) * rand;
                 [~,random_time_idx]=min(abs(timeVals-random_time_center));
                 random_PSD_gatherer_sg_burst(:,trial_idx_sg)=10*(log10(E(:,random_time_idx))-bl_avg);
                 trial_idx_sg=trial_idx_sg+1;
-                % freq_gatherer_sg_burst=[freq_gatherer_sg_burst,freqVals'];
+                freq_gatherer_sg_burst=[freq_gatherer_sg_burst,freqVals'];
             end
         end
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -109,12 +105,12 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,fast_gamma_freq);
         thresholdFactor=sqrt(thresholdFraction*diffPower);
         [length_temp_fg,freq_temp_fg,time_center_temp_fg,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
-        % [~,freqVals]=getEnergyMP3p1(gabor_temp,header_temp,timeVals);
+        [~,freqVals]=getEnergyMP3p1(gabor_temp,header_temp,timeVals);
         for ii=1:length(length_temp_fg)
             if isempty(length_temp_fg{ii})
                 continue;
             end
-            % E=mp2tf(squeeze(gabor_temp(ii,:,:)),header_temp(ii,:));
+            E=mp2tf(squeeze(gabor_temp(ii,:,:)),header_temp(ii,:));
             % E= 256 (freq vals) x 512 (time vals)
             E=E_TF_MP_gatherer{counter}{ii};
             E(E<threshold_pow)=threshold_pow;
@@ -125,8 +121,7 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
             num_bursts=length(time_center_temp_fg{ii});
             for jj=1:num_bursts
                 [~,time_idx]=min(abs(timeVals-time_center_temp_fg{ii}(jj)));
-                % PSD_gatherer_fg_burst=[PSD_gatherer_fg_burst,E(:,time_idx)];
-                % freq_gatherer_fg_burst=[freq_gatherer_fg_burst,freqVals'];
+                freq_gatherer_fg_burst=[freq_gatherer_fg_burst,freqVals'];
                 PSD_gatherer_fg_burst(:,trial_idx_fg)=10*(log10(E(:,time_idx))-bl_avg);
                 % Generate a random time point within the stimulus period
                 random_time_center=stimulusPeriodS(1) + (stimulusPeriodS(2) - stimulusPeriodS(1)) * rand;
@@ -140,14 +135,13 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Already computed and saved the TF values for all bursts in both monkeys. 
-    % if Monkey_num==1
-    %     save('MP_TF_vals_M1.mat','E_TF_MP_gatherer','E_avg_MP_gatherer','freqVals','freq_gatherer_fg_burst','freq_gatherer_sg_burst','-v7.3');
-    % elseif Monkey_num==2
-    %     save('MP_TF_vals_M2.mat','E_TF_MP_gatherer','E_avg_MP_gatherer','freqVals','freq_gatherer_fg_burst','freq_gatherer_sg_burst','-v7.3');
-    % end
+    if Monkey_num==1
+         save('MP_TF_vals_M1.mat','E_TF_MP_gatherer','E_avg_MP_gatherer','freqVals','freq_gatherer_fg_burst','freq_gatherer_sg_burst','-v7.3');
+    elseif Monkey_num==2
+         save('MP_TF_vals_M2.mat','E_TF_MP_gatherer','E_avg_MP_gatherer','freqVals','freq_gatherer_fg_burst','freq_gatherer_sg_burst','-v7.3');
+    end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % avg_window=4;
-    avg_window=9;
+    avg_window=9; % 4 Hz (freq resolution-0.5 Hz)
     subplot(plotHandles(Monkey_num,2));
     avg_PSD_gatherer_sg_burst=mean(PSD_gatherer_sg_burst,2);
     avg_PSD_gatherer_sg_burst=movmean(avg_PSD_gatherer_sg_burst,avg_window);
