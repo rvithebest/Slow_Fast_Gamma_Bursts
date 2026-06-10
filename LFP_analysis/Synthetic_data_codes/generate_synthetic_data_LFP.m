@@ -1,10 +1,8 @@
-function [analogData,timeVals,analogData0] = synthetic_data_LFP(burstLen)
-    if nargin<1
-        burstLen=0.4;
-    end
+function [analogData,timeVals,analogData0,num_burst_gatherer,freq_burst_gatherer,...
+    time_center_burst_gatherer,amp_burst_gatherer] = generate_synthetic_data_LFP(burstLen)
     %default parameters for the stimulation
     cvAmp = 0.1;                
-    displayFlag = 1;                         
+    displayFlag = 0;                         
     stimulusPeriod = [0.25 0.75];     
     %%%%%% BROAD GAMMA RANGE %%%%%%%%%%%%%%%%%%%%
     gammaRange = [20 65];          
@@ -83,20 +81,26 @@ function [analogData,timeVals,analogData0] = synthetic_data_LFP(burstLen)
     % Get Mean FFTs
     mFFTst = mean(abs(fft(st(1:numTrials,:),[],2)));
     mFFTbl = mean(abs(fft(bl(1:numTrials,:),[],2)));
-    
     % Get parameters for simulations
     meanGammaAmps = (mFFTst(fPos)- mFFTbl(fPos));
-    % burstLen=0.3;
     burstSignal = zeros(numTrials,length(timeVals));
+    num_burst_gatherer=cell(1,numTrials);
+    freq_burst_gatherer=cell(1,numTrials);
+    time_center_burst_gatherer=cell(1,numTrials);
+    amp_burst_gatherer=cell(1,numTrials);
     for i=1:numTrials
         burstCenterTimeList = getBurstTimes(numBurstsPerTrial,stimulusPeriod,burstLen);
         numBursts = length(burstCenterTimeList);
+        num_burst_gatherer{i} = numBursts;
         if numBursts>0
             for j=1:numBursts
                 burstCenterTime = burstCenterTimeList(j);
+                time_center_burst_gatherer{i}=[time_center_burst_gatherer{i}, burstCenterTime];
                 fIndex = randi(numGammaPoints); % uniformly within gamma
                 burstCenterFreq = freqVals(fPos(fIndex));
+                freq_burst_gatherer{i}=[freq_burst_gatherer{i}, burstCenterFreq];
                 burstAmplitude = meanGammaAmps(fIndex)*(1+cvAmp*randn);
+                amp_burst_gatherer{i}=[amp_burst_gatherer{i}, burstAmplitude];
                 burst = burstAmplitude*cos(2*pi*burstCenterFreq*timeVals+2*pi*rand).*exp(-((timeVals-burstCenterTime)/(sqrt(2)*(burstLen/4))).^2);
                 burstSignal(i,:) = burstSignal(i,:)+burst;
             end

@@ -1,13 +1,15 @@
 clc;clear
 f=figure;
 f.WindowState="Maximized";
-plotHandles_1=getPlotHandles(2,1,[0.08 0.08 0.8 0.8],0.15,0.15,0);
+plotHandles_1=getPlotHandles(2,2,[0.08 0.08 0.5 0.8],0.08,0.15,0);
 slow_gamma_freq=[20 40]; fast_gamma_freq=[40 80];
 theta_E_vals=[1,4,16,64];
 theta_I_vals=[1,4,16,64];
 input_vals=[7,8,9,10,11,12,13,14];
 length_vals_sg=cell(4,4);
 length_vals_fg=cell(4,4);
+Peak_freq_sg_gatherer=cell(4,4);
+Peak_freq_fg_gatherer=cell(4,4);
 idx=1;
 for i=1:length(theta_E_vals)
     for j=1:length(theta_I_vals)
@@ -21,7 +23,8 @@ for i=1:length(theta_E_vals)
             load(folder_name+"/MP_analysis_results.mat");
             gamma_freq=fast_gamma_freq;
             %%%%%%%%%%%%% Burst Length %%%%%%%%%%%%%%%
-            [Thresh_vals_fg,Width_vals_fg] = get_Threshold_model(lfp_decimated, timeVals_decimated, stimulusPeriodS,2);
+            [Thresh_vals_fg,Width_vals_fg,Peak_pow_fg,Peak_freq_fg] = get_Threshold_model(lfp_decimated, timeVals_decimated, stimulusPeriodS,2);
+            Peak_freq_fg_gatherer{i,j}=[Peak_freq_fg_gatherer{i,j},(Peak_freq_fg)];
             [length_temp_fg,~,time_center_temp_fg,gabor_temp,header_temp,~]= getBurstLengthMP_model(lfp_decimated,timeVals_decimated,displayFlag,stimulusPeriodS,baselinePeriodS,gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp,Thresh_vals_fg,Width_vals_fg);
             length_temp_all_trials_fg=[];
             for ii=1:length(length_temp_fg)
@@ -43,7 +46,8 @@ for i=1:length(theta_E_vals)
             load(folder_name+"/MP_analysis_results.mat");
             gamma_freq=slow_gamma_freq;
             %%%%%%%%%%%%%%%% Burst Length %%%%%%%%%%%%%%%
-            [Thresh_vals_sg, Width_vals_sg] = get_Threshold_model(lfp_decimated, timeVals_decimated, stimulusPeriodS,1);
+            [Thresh_vals_sg, Width_vals_sg,Peak_pow_sg,Peak_freq_sg] = get_Threshold_model(lfp_decimated, timeVals_decimated, stimulusPeriodS,1);
+            Peak_freq_sg_gatherer{i,j}=[Peak_freq_sg_gatherer{i,j},(Peak_freq_sg)];
             [length_temp_sg,~,time_center_temp_sg,gabor_temp,header_temp,~]= getBurstLengthMP_model(lfp_decimated,timeVals_decimated,displayFlag,stimulusPeriodS,baselinePeriodS,gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp,Thresh_vals_sg,Width_vals_sg);
             length_temp_all_trials_sg=[];
             for ii=1:length(length_temp_sg)
@@ -65,48 +69,72 @@ for i=1:length(theta_E_vals)
 end
 median_length_vals_sg=zeros(4,4);
 median_length_vals_fg=zeros(4,4);
+mean_peak_freq_sg=zeros(4,4);
+mean_peak_freq_fg=zeros(4,4);
 for i=1:4
 for j=1:4
     median_length_vals_sg(i,j)=median(length_vals_sg{i,j});
     median_length_vals_fg(i,j)=median(length_vals_fg{i,j});
+    mean_peak_freq_sg(i,j)=mean(Peak_freq_sg_gatherer{i,j});
+    mean_peak_freq_fg(i,j)=mean(Peak_freq_fg_gatherer{i,j});
 end
 end
+theta_I_axis=categorical({'1','4','16','64'});
+theta_E_axis=categorical({'1','4','16','64'});
 % Plot heatmaps of median burst lengths for slow gamma and fast gamma
 subplot(plotHandles_1(1,1));
 imagesc(median_length_vals_sg);
-% revert the y-axis
+colormap('jet');
 set(gca,'YDir','normal');
 c=colorbar;
-% set climits
-caxis([0.2 1.4]);
-% Y ticks- theta_I (1,4,16,64)
-theta_I_axis=categorical({'1','4','16','64'});
+clim([0.2 1.4]);
 set(gca,'XTick',1:4,'YTickLabel',theta_I_axis);
-theta_E_axis=categorical({'1','4','16','64'});
 set(gca,'YTick',1:4,'XTickLabel',theta_E_axis);
-title('Median Burst Length - Slow Gamma');
+title('Median Burst length (s)');
 xlabel('\theta_I');
 ylabel('\theta_E');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 subplot(plotHandles_1(2,1));
 imagesc(median_length_vals_fg);
-% revert the y-axis
+colormap('jet');
 set(gca,'YDir','normal');
 c=colorbar;
-% set climits
-caxis([0.2 1.4]);
-% Y ticks- theta_I (1,4,16,64)
-theta_I_axis=categorical({'1','4','16','64'});
+clim([0.2 1.4]);
 set(gca,'XTick',1:4,'YTickLabel',theta_I_axis);
-theta_E_axis=categorical({'1','4','16','64'});
 set(gca,'YTick',1:4,'XTickLabel',theta_E_axis);
-title('Median Burst Length - Fast Gamma');
+title('Median Burst length (s)');
 xlabel('\theta_I');
 ylabel('\theta_E');
-set_axis_ticks_fontsize(plotHandles_1,16,14,1);
-set_axis_ticks_fontsize(plotHandles_1,16,14,2);
-labels = {'A','B'};
-x_positions = [0.01];
-y_positions = [0.9, 0.4];  % top and bottom rows
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(plotHandles_1(1,2));
+imagesc(mean_peak_freq_sg);
+colormap('jet');
+set(gca,'YDir','normal');
+c=colorbar;
+% clim([25 28])
+clim([20 30]);
+set(gca,'XTick',1:4,'YTickLabel',theta_I_axis);
+set(gca,'YTick',1:4,'XTickLabel',theta_E_axis);
+title('Peak Frequency (Hz)');
+xlabel('\theta_I');
+ylabel('\theta_E');
+subplot(plotHandles_1(2,2));
+imagesc(mean_peak_freq_fg);
+colormap('jet');
+set(gca,'YDir','normal');
+c=colorbar;
+clim([45 70]);
+set(gca,'XTick',1:4,'YTickLabel',theta_I_axis);
+set(gca,'YTick',1:4,'XTickLabel',theta_E_axis);
+title('Peak Frequency (Hz)');
+xlabel('\theta_I');
+ylabel('\theta_E');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+set_axis_ticks_fontsize(plotHandles_1,20,18,1);
+set_axis_ticks_fontsize(plotHandles_1,20,18,2);
+labels = {'A','B','C','D'};
+x_positions = [0.03, 0.325];
+y_positions = [0.86, 0.37];  % top and bottom rows
 k = 1;
 for j = 1:length(y_positions)
     for i = 1:length(x_positions)
@@ -120,3 +148,23 @@ for j = 1:length(y_positions)
         k = k + 1;
     end
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+annotation('textbox',...
+[0.05 0.68 0.08 0.09],...
+'String',{'Slow \gamma'},...
+'Rotation',90,...
+'FontWeight','bold',...
+'Color','b',...
+'FontSize',20,...
+'FontName','Helvetica',...
+'EdgeColor',[1 1 1]);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+annotation('textbox',...
+[0.05 0.21 0.08 0.09],...
+'String',{'Fast \gamma'},...
+'Rotation',90,...
+'FontWeight','bold',...
+'Color',[1 0.5 0],...
+'FontSize',20,...
+'FontName','Helvetica',...
+'EdgeColor',[1 1 1]);

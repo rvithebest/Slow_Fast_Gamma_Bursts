@@ -1,296 +1,133 @@
-clc;clear;close all
+clc;clear
 f=figure;
 f.WindowState="Maximized";
-plotHandles=getPlotHandles(2,4,[0.08 0.08 0.9 0.85],0.07,0.06,0);
-for Monkey_num=1:2
-    clearvars -except Monkey_num f plotHandles
-    parent_file_path='C:\Users\rviiy\OneDrive - Indian Institute of Science\gamma_length_project_EEG_SRAYlab';
-    displayFlag=0;
-    stimulusPeriodS=[0.25 0.75];
-    baselinePeriodS=[-0.5 0];
-    thresholdFraction=0.5;
-    filterOrder=4;
-    num_iterations=120;
-    dict_size=2500000;
-    if Monkey_num==1
-      % Monkey- alpaH
-        load('gamma_duration_alpaH_OMP_GEAR.mat');
-        load((fullfile(parent_file_path,'alpaH_info','parameterCombinations.mat')))
-        load(fullfile(parent_file_path,'alpaH_info','badTrials.mat'));
-        load(fullfile(parent_file_path,'alpaH_info','alpaHMicroelectrodeRFData.mat'));
-        LFP_data_file=dir(fullfile(parent_file_path,'LFP_data_alpa_H'));
-        LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
-        LFP_data_file = natsortfiles({LFP_data_file.name});
-        slow_gamma_freq=[20 32];
-        fast_gamma_freq=[36 65];
-        gabor_accumulator=gaborInfo_accumulator_ORI;
-        header_accumulator=header_accumulator_ORI;
-    elseif Monkey_num==2
-        % Monkey- kesariH
-        load('gamma_duration_kesariH_OMP_GEAR.mat');
-        load((fullfile(parent_file_path,'kesariH_info','parameterCombinations.mat')))
-        load(fullfile(parent_file_path,'kesariH_info','badTrials.mat'));
-        load(fullfile(parent_file_path,'kesariH_info','kesariHMicroelectrodeRFData.mat'));
-        LFP_data_file=dir(fullfile(parent_file_path,'LFP_data_kesari_H'));
-        LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'}));
-        LFP_data_file = natsortfiles({LFP_data_file.name});
-        slow_gamma_freq=[20 38];
-        fast_gamma_freq=[42 65];
-        gabor_accumulator=gaborInfo_accumulator_ORI;
-        header_accumulator=header_accumulator_ORI;
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    load('timeVals.mat')
-    num_elec=length(current_electrode);
-    counter=1;
-    length_gatherer_sg_hilbert=cell(1,num_elec);
-    length_gatherer_fg_hilbert=cell(1,num_elec);
-    length_gatherer_sg_OMP_gear=cell(1,num_elec);
-    length_gatherer_fg_OMP_gear=cell(1,num_elec);
-    %%% for power gatherer
-    power_gatherer_sg_hilbert=zeros(1,num_elec);
-    power_gatherer_fg_hilbert=zeros(1,num_elec);
-    power_gatherer_sg_OMP_gear=zeros(1,num_elec);
-    power_gatherer_fg_OMP_gear=zeros(1,num_elec);
-    % for onset gatherer
-    onset_gatherer_sg_hilbert=cell(1,num_elec);
-    onset_gatherer_fg_hilbert=cell(1,num_elec);
-    onset_gatherer_sg_OMP_gear=cell(1,num_elec);
-    onset_gatherer_fg_OMP_gear=cell(1,num_elec);
-    %%% for se start karna hai
-    for i=current_electrode
-        if Monkey_num==1
-            load(fullfile(parent_file_path,'LFP_data_alpa_H',LFP_data_file{i}))
-            gabor_temp=gabor_accumulator{1,1,counter};
-            header_temp=header_accumulator{1,1,counter};
-        end
-        if Monkey_num==2
-            load(fullfile(parent_file_path,'LFP_data_kesari_H',LFP_data_file{i}))
-            gabor_temp=gabor_accumulator{1,8,counter};
-            header_temp=header_accumulator{1,8,counter};
-        end
-        % ORI- 157.5 deg and SF- 1cpd : for analysis
-        ORI_num=8; SF_num=2;
-        trial_temp=parameterCombinations{:,:,:,SF_num,ORI_num};
-        trial_temp=setdiff(trial_temp,badTrials);
-        data_temp=analogDataDecimated(trial_temp,:);
-        %%%%%% Slow gamma burst computation %%%%%%
-        %%% Hilbert transform %%%%%%%%%%%%%%%%
-        diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,slow_gamma_freq);
-        power_gatherer_sg_hilbert(counter)=diffPower;
-        power_gatherer_sg_OMP_gear(counter)=diffPower;
-        thresholdFactor=(thresholdFraction*diffPower);
-        [length_temp_sg,time_center_temp_sg]= getBurstLengthHilbert(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,filterOrder);
-        length_temp_all_trials=[];
-        onset_temp_all_trials=[];
-        for ii=1:length(length_temp_sg)
-            if isempty(length_temp_sg{ii})
-                continue;
-            end
-            reject_idx=find((length_temp_sg{ii})>0.8);
-            length_temp_sg{ii}(reject_idx)=[];
-            time_center_temp_sg{ii}(reject_idx)=[];
-            length_temp_all_trials=[length_temp_all_trials,length_temp_sg{ii}];
-            % Find the first burst (in terms of time) in each trial
-            % Onset time (earliest)
-            onset_time_temp_trial_sg=time_center_temp_sg{ii}-((length_temp_sg{ii})*0.5);
-            % onset_time_temp_trial_sg(onset_time_temp_trial_sg<0)=0; % Ensuring onset time is not before stimulus presentation
-            onset_idx=(find((onset_time_temp_trial_sg)==min(onset_time_temp_trial_sg)));
-            onset_temp_all_trials=[onset_temp_all_trials,onset_time_temp_trial_sg(onset_idx)]; 
-        end
-        length_gatherer_sg_hilbert{counter}=length_temp_all_trials;
-        onset_gatherer_sg_hilbert{counter}=onset_temp_all_trials;
-        %%%%%% OMP-GEAR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        thresholdFactor=sqrt(0.5*diffPower);
-        [length_temp_sg,~,time_center_temp_sg,~,~,~]= getBurstLength_all(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp,'OMP-GEAR');
-        length_temp_all_trials=[];
-        onset_temp_all_trials=[];
-        for ii=1:length(length_temp_sg)
-            if isempty(length_temp_sg{ii}')
-                continue;
-            end
-            reject_idx=find((length_temp_sg{ii}')>0.8);
-            length_temp_sg{ii}(reject_idx)=[];
-            time_center_temp_sg{ii}(reject_idx)=[];
-            length_temp_all_trials=[length_temp_all_trials,length_temp_sg{ii}'];
-            % Find the first burst (in terms of time) in each trial
-            % Onset time (earliest)
-            onset_time_temp_trial_sg=(time_center_temp_sg{ii}')-((length_temp_sg{ii}')*0.5);
-            % onset_time_temp_trial_sg(onset_time_temp_trial_sg<0)=0; % Ensuring onset time is not before stimulus presentation
-            onset_idx=(find((onset_time_temp_trial_sg)==min(onset_time_temp_trial_sg)));
-            onset_temp_all_trials=[onset_temp_all_trials,onset_time_temp_trial_sg(onset_idx)];
-        end
-        length_gatherer_sg_OMP_gear{counter}=length_temp_all_trials;
-        onset_gatherer_sg_OMP_gear{counter}=onset_temp_all_trials;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%% Fast gamma burst computation %%%%%%
-        %%% Hilbert transform %%%%%%%%%%%%%%%%%%%
-        diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,fast_gamma_freq);
-        power_gatherer_fg_hilbert(counter)=diffPower;
-        power_gatherer_fg_OMP_gear(counter)=diffPower;
-        power_gatherer_fg_feingold(counter)=diffPower;
-        power_gatherer_fg_wavelet(counter)=diffPower;
-        thresholdFactor=(thresholdFraction*diffPower);
-        [length_temp_fg,time_center_temp_fg]= getBurstLengthHilbert(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,filterOrder);
-        length_temp_all_trials=[];
-        onset_temp_all_trials=[];
-        for ii=1:length(length_temp_fg)
-            if isempty(length_temp_fg{ii})
-                continue;
-            end
-            reject_idx=find((length_temp_fg{ii})>0.8);
-            length_temp_fg{ii}(reject_idx)=[];
-            time_center_temp_fg{ii}(reject_idx)=[];
-            length_temp_all_trials=[length_temp_all_trials,length_temp_fg{ii}];
-            % Find the first burst (in terms of time) in each trial
-            % Onset time (earliest)
-            onset_time_temp_trial_fg=(time_center_temp_fg{ii}')-((length_temp_fg{ii}')*0.5);
-            % onset_time_temp_trial_fg(onset_time_temp_trial_fg<0)=0; % Ensuring onset time is not before stimulus presentation
-            onset_idx=(find((onset_time_temp_trial_fg)==min(onset_time_temp_trial_fg)));
-            onset_temp_all_trials=[onset_temp_all_trials,onset_time_temp_trial_fg(onset_idx)];
-        end
-        length_gatherer_fg_hilbert{counter}=length_temp_all_trials;
-        onset_gatherer_fg_hilbert{counter}=onset_temp_all_trials;
-        %%%%%% OMP-GEAR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        thresholdFactor=sqrt(0.5*diffPower);
-        [length_temp_fg,~,time_center_temp_fg,~,~,~]= getBurstLength_all(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp,'OMP-GEAR');
-        length_temp_all_trials=[];
-        onset_temp_all_trials=[];
-        for ii=1:length(length_temp_fg)
-            if isempty(length_temp_fg{ii})
-                continue;
-            end
-            reject_idx=find((length_temp_fg{ii})>0.8);
-            length_temp_fg{ii}(reject_idx)=[];
-            time_center_temp_fg{ii}(reject_idx)=[];
-            length_temp_all_trials=[length_temp_all_trials,length_temp_fg{ii}'];
-            % Find the first burst (in terms of time) in each trial
-            % Onset time (earliest)
-            onset_time_temp_trial_fg=(time_center_temp_fg{ii}')-((length_temp_fg{ii}')*0.5);
-            % onset_time_temp_trial_fg(onset_time_temp_trial_fg<0)=0; % Ensuring onset time is not before stimulus presentation
-            onset_idx=(find((onset_time_temp_trial_fg)==min(onset_time_temp_trial_fg)));
-            onset_temp_all_trials=[onset_temp_all_trials,onset_time_temp_trial_fg(onset_idx)];
-        end
-        length_gatherer_fg_OMP_gear{counter}=length_temp_all_trials;
-        onset_gatherer_fg_OMP_gear{counter}=onset_temp_all_trials;
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        counter=counter+1;
-    end
-    length_all_elec_sg_hilbert=[];
-    length_all_elec_fg_hilbert=[];
-    median_gatherer_sg_hilbert=zeros(1,num_elec);
-    median_gatherer_fg_hilbert=zeros(1,num_elec);
-    length_all_elec_sg_OMP_gear=[];
-    length_all_elec_fg_OMP_gear=[];
-    median_gatherer_sg_OMP_gear=zeros(1,num_elec);
-    median_gatherer_fg_OMP_gear=zeros(1,num_elec);
-    mean_onset_gatherer_sg_OMP_gear=zeros(1,num_elec);
-    mean_onset_gatherer_fg_OMP_gear=zeros(1,num_elec);
-    mean_onset_gatherer_sg_hilbert=zeros(1,num_elec);
-    mean_onset_gatherer_fg_hilbert=zeros(1,num_elec);
-    for i=1:num_elec
-        %%%%%%%%%%%%% Hilbert transform %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        median_gatherer_sg_hilbert(i)=median(length_gatherer_sg_hilbert{i});
-        median_gatherer_fg_hilbert(i)=median(length_gatherer_fg_hilbert{i});
-        mean_onset_gatherer_sg_hilbert(i)=mean(onset_gatherer_sg_hilbert{i});
-        mean_onset_gatherer_fg_hilbert(i)=mean(onset_gatherer_fg_hilbert{i});
-        if (length(length_gatherer_sg_hilbert{i})<20 || length(length_gatherer_fg_hilbert{i})<20)
-            median_gatherer_sg_hilbert(i)=0;
-            median_gatherer_fg_hilbert(i)=0;
-            power_gatherer_sg_hilbert(i)=0;
-            power_gatherer_fg_hilbert(i)=0;
-            mean_onset_gatherer_sg_hilbert(i)=0;
-            mean_onset_gatherer_fg_hilbert(i)=0;
-        end
-        %%%%% OMP-GEAR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        median_gatherer_sg_OMP_gear(i)=median(length_gatherer_sg_OMP_gear{i});
-        median_gatherer_fg_OMP_gear(i)=median(length_gatherer_fg_OMP_gear{i});
-        mean_onset_gatherer_sg_OMP_gear(i)=mean(onset_gatherer_sg_OMP_gear{i});
-        mean_onset_gatherer_fg_OMP_gear(i)=mean(onset_gatherer_fg_OMP_gear{i});
-        if (length(length_gatherer_sg_OMP_gear{i})<20) || (length(length_gatherer_fg_OMP_gear{i})<20)
-            median_gatherer_sg_OMP_gear(i)=0;
-            median_gatherer_fg_OMP_gear(i)=0;
-            power_gatherer_sg_OMP_gear(i)=0;
-            power_gatherer_fg_OMP_gear(i)=0;
-            mean_onset_gatherer_sg_OMP_gear(i)=0;
-            mean_onset_gatherer_fg_OMP_gear(i)=0;
-        end
-    end
-    power_gatherer_sg_hilbert=power_gatherer_sg_hilbert(power_gatherer_sg_hilbert~=0);
-    power_gatherer_fg_hilbert=power_gatherer_fg_hilbert(power_gatherer_fg_hilbert~=0);
-    median_gatherer_sg_hilbert=median_gatherer_sg_hilbert(median_gatherer_sg_hilbert~=0);
-    median_gatherer_fg_hilbert=median_gatherer_fg_hilbert(median_gatherer_fg_hilbert~=0);
-    power_gatherer_sg_OMP_gear=power_gatherer_sg_OMP_gear(power_gatherer_sg_OMP_gear~=0);
-    power_gatherer_fg_OMP_gear=power_gatherer_fg_OMP_gear(power_gatherer_fg_OMP_gear~=0);
-    median_gatherer_sg_OMP_gear=median_gatherer_sg_OMP_gear(median_gatherer_sg_OMP_gear~=0);
-    median_gatherer_fg_OMP_gear=median_gatherer_fg_OMP_gear(median_gatherer_fg_OMP_gear~=0);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    power_gatherer_sg_hilbert=10*log10(power_gatherer_sg_hilbert);
-    power_gatherer_fg_hilbert=10*log10(power_gatherer_fg_hilbert);
-    power_gatherer_sg_OMP_gear=10*log10(power_gatherer_sg_OMP_gear);
-    power_gatherer_fg_OMP_gear=10*log10(power_gatherer_fg_OMP_gear);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    mean_onset_gatherer_sg_hilbert=mean_onset_gatherer_sg_hilbert(mean_onset_gatherer_sg_hilbert~=0);
-    mean_onset_gatherer_fg_hilbert=mean_onset_gatherer_fg_hilbert(mean_onset_gatherer_fg_hilbert~=0);
-    mean_onset_gatherer_sg_OMP_gear=mean_onset_gatherer_sg_OMP_gear(mean_onset_gatherer_sg_OMP_gear~=0);
-    mean_onset_gatherer_fg_OMP_gear=mean_onset_gatherer_fg_OMP_gear(mean_onset_gatherer_fg_OMP_gear~=0);
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%% Hilbert transform %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    subplot(plotHandles(Monkey_num,1))
-    if Monkey_num==1
-       load('length_hilbert_matched_power_M1.mat','matched_sg_lengths','matched_fg_lengths','matched_sg_indices','matched_fg_indices');
-    end
-    if Monkey_num==2
-        load('length_hilbert_matched_power_M2.mat','matched_sg_lengths','matched_fg_lengths','matched_sg_indices','matched_fg_indices');
-    end
-    % [matched_sg_indices,matched_fg_indices]=power_matching_hist(power_gatherer_sg_hilbert,power_gatherer_fg_hilbert);
-    matched_sg_lengths=median_gatherer_sg_hilbert(matched_sg_indices);
-    matched_fg_lengths=median_gatherer_fg_hilbert(matched_fg_indices);
-    violin_swarm_plot(matched_sg_lengths,matched_fg_lengths);
-    if Monkey_num==1
-        title('Hilbert','FontSize',24,'FontWeight','bold','FontName','Helvetica');
-    end
-    subplot(plotHandles(Monkey_num,2))
-    violin_swarm_plot_paired(mean_onset_gatherer_sg_hilbert, mean_onset_gatherer_fg_hilbert,2);
-    if Monkey_num==1
-       save("Onset_gather_hilbert_M1.mat","mean_onset_gatherer_sg_hilbert","mean_onset_gatherer_fg_hilbert");
-    elseif Monkey_num==2
-       save("Onset_gather_hilbert_M2.mat","mean_onset_gatherer_sg_hilbert","mean_onset_gatherer_fg_hilbert");
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %%%%%%%%%%%%%%%%%%%%%%%%%%% OMP-GEAR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    subplot(plotHandles(Monkey_num,3))
-    if Monkey_num==1
-       ylim([0 0.6])
-       load('length_OMP_gear_matched_power_M1.mat','matched_sg_lengths','matched_fg_lengths','matched_sg_indices','matched_fg_indices');
-    end 
-    if Monkey_num==2
-        ylim([0 0.4])
-        load('length_OMP_gear_matched_power_M2.mat','matched_sg_lengths','matched_fg_lengths','matched_sg_indices','matched_fg_indices');
-    end
-    % [matched_sg_indices,matched_fg_indices]=power_matching_hist(power_gatherer_sg_OMP_gear,power_gatherer_fg_OMP_gear);
-    %  matched_sg_lengths=median_gatherer_sg_OMP_gear(matched_sg_indices);
-    %  matched_fg_lengths=median_gatherer_fg_OMP_gear(matched_fg_indices);
-    violin_swarm_plot(matched_sg_lengths,matched_fg_lengths);
-    if Monkey_num==1
-        title('OMP-GEAR','FontSize',24,'FontWeight','bold','FontName','Helvetica');
-    end
-    subplot(plotHandles(Monkey_num,4))
-    violin_swarm_plot_paired(mean_onset_gatherer_sg_OMP_gear, mean_onset_gatherer_fg_OMP_gear,2)
-    if Monkey_num==1
-       save("Onset_gather_OMP_gear_M1.mat","mean_onset_gatherer_sg_OMP_gear","mean_onset_gatherer_fg_OMP_gear");
-    elseif Monkey_num==2
-       save("Onset_gather_OMP_gear_M2.mat","mean_onset_gatherer_sg_OMP_gear","mean_onset_gatherer_fg_OMP_gear");
-    end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    set_axis_ticks_fontsize(plotHandles,22,16,Monkey_num);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-labels = {'A','B','C','D','E','F','G','H'};
-x_positions = [0.03, 0.27, 0.51, 0.76];
-y_positions = [0.9, 0.42];  % top and bottom rows
+plotHandles=getPlotHandles(1,4,[0.08 0.55 0.85 0.4],0.08,0.08,0);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+parent_file_path='C:\Users\rviiy\OneDrive - Indian Institute of Science\gamma_length_project_EEG_SRAYlab';
+load(fullfile(parent_file_path,'alpaH_info','parameterCombinations.mat'));
+%badtrials file is loaded
+load(fullfile(parent_file_path,'alpaH_info','badTrials.mat'));
+% selected electrode file is loaded-RF data file
+load(fullfile(parent_file_path,'alpaH_info','alpaHMicroelectrodeRFData.mat'));
+% LFP_data file is loaded
+LFP_data_file=dir(fullfile(parent_file_path,"Decimated_8_LFP_data_alpa_H"));
+load('gamma_duration_alpaH_MP.mat');
+% natrisort the LFP data-remain in form of struct
+LFP_data_file = LFP_data_file(~ismember({LFP_data_file.name},{'.','..'})); %remove . and ..
+%I want all the files in the folder to be sorted by their name in order 1,2,3... (not 1,10,11,..)
+LFP_data_file = natsortfiles({LFP_data_file.name});
+stimulusPeriodS=[0.25 0.75];
+baselinePeriodS=[-0.5 0];
+%%%%%%%% Used for calculating the change in power %%%%%%%%%%%%%%
+fast_gamma_freq=[36 65];
+%%%%%%% for alpaH - slow gamma range is taken from 25 to 40 Hz%%%%%%%%%
+slow_gamma_freq=[20 32];
+selected_elec=highRMSElectrodes;
+selected_elec_LFP=selected_elec(1:77);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%j=1;% counter for electrode position
+electrode_num=length(selected_elec_LFP);
+%%%%%%%%%%%%%%%%%%%%%%%%%%% LFP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 32- possible elec
+selected_elec_pos=37;
+i=selected_elec_LFP(selected_elec_pos);
+load(fullfile('Decimated_8_LFP_Data_alpa_H',LFP_data_file{i}));%analogDataDecimatedDecimated
+load('timeVals.mat')
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+current_SF=2; % 1 CPD
+current_ORI=3; % 45 deg
+trial=1; % first trial of SF- 1 cpd and 45 deg
+% SF- 1 cpd and 157.5 deg- trial num=6, 13, 17
+%%%%%%%%%%%%%% BAND-PASS FILTERING %%%%%%%%%%%%%%%%%%%%%%
+trial_temp=[parameterCombinations{:,:,:,current_SF,current_ORI}];
+trial_temp=setdiff(trial_temp,badTrials);
+LFP_signal=analogDataDecimated(trial_temp,:);
+% Plot the original LFP data signal
+LFP_signal_one_trial=LFP_signal((trial),:);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+thresholdFraction=0.5;
+num_iterations=120;
+dict_Size=2500000;
+jj=selected_elec_pos;
+displayFlag=1;
+% current elec- 41 (pos-37)
+data_temp=LFP_signal_one_trial;
+Fs=250;
+params.Fs=Fs;
+params.fpass=[0 150];
+params.tapers=[1 1];
+params.trialave=1;
+params.pad=-1;
+params.err=[2 0.05];
+movingWin=[0.2 0.02];
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+[S_temp,t_temp,f_temp]=mtspecgramc(data_temp',movingWin,params);
+t_temp=t_temp+timeVals(1)-(1/Fs); % Center the times with respect to the stimulus onset time
+subplot(plotHandles(1,2));
+pcolor(t_temp,f_temp,log10(S_temp)'); hold on;
+shading interp;
+colormap('jet');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(plotHandles(1,3));
+[~,~]=getBurstLengthCGT(data_temp,timeVals,[],1,stimulusPeriodS,baselinePeriodS,[0 100],0.0125,2.5);
+subplot(plotHandles(1,4));
+[~,~]=getBurstLengthCGT(data_temp,timeVals,[],1,stimulusPeriodS,baselinePeriodS,[0 100],0.025,2.5);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+gabor_SF=gaborInfo_accumulator_alpaH{current_SF,current_ORI,jj};
+gabor_SF_one_trial=gabor_SF(trial,:,:);
+header_SF=header_accumulator_alpaH{current_SF,current_ORI,jj};
+header_SF_one_trial=header_SF(trial,:,:);
+load('MP_non_filt_single_trial_results.mat')
+%%%%%%%%%%%%%%%%%% Slow gamma %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+gamma_freq=[20 65];
+num_iterations=600;
+diffPower=getChangeInPower_single(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,gamma_freq);
+thresholdFactor=sqrt(thresholdFraction*diffPower);
+[~,~,~,~,~,~]= getBurstLengthMP_plot(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,gamma_freq,num_iterations,0.9,dict_Size,gabor_temp_one_trial(:,1:200,:),header_temp_one_trial,plotHandles,1,1);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\
+% plot the burst length at time burst center and y-axis frequency_measured
+load("Detected_burst_data_MP_sample_elec.mat","length_measured_sg","freq_measured_sg","time_measured_sg","length_measured_fg","freq_measured_fg","time_measured_fg");
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(plotHandles(1,1));
+plot_bursts_on_TF_plot(length_measured_sg,length_measured_fg,...
+    time_measured_sg,time_measured_fg,freq_measured_sg,freq_measured_fg,trial,...
+    timeVals,slow_gamma_freq,fast_gamma_freq);
+clim([-4 4]);
+xlabel('Time(s)');
+ylabel('Frequency(Hz)');
+c=colorbar;
+c.Position = c.Position + [0.03 0 0.003 0];
+c.FontSize = 16;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(plotHandles(1,2))
+plot_bursts_on_TF_plot(length_measured_sg,length_measured_fg,...
+    time_measured_sg,time_measured_fg,freq_measured_sg,freq_measured_fg,trial,...
+    timeVals,slow_gamma_freq,fast_gamma_freq);
+clim([-2 2]);
+xlabel('Time(s)');
+ylabel('Frequency(Hz)');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(plotHandles(1,3));
+plot_bursts_on_TF_plot(length_measured_sg,length_measured_fg,...
+    time_measured_sg,time_measured_fg,freq_measured_sg,freq_measured_fg,trial,...
+    timeVals,slow_gamma_freq,fast_gamma_freq);
+clim([3 9]);
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(plotHandles(1,4));
+plot_bursts_on_TF_plot(length_measured_sg,length_measured_fg,...
+    time_measured_sg,time_measured_fg,freq_measured_sg,freq_measured_fg,trial,...
+    timeVals,slow_gamma_freq,fast_gamma_freq);
+clim([3 9]);
+xlabel('Time (s)');
+ylabel('Frequency (Hz)');
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+set_axis_ticks_fontsize(plotHandles,22,18,1);
+labels = {'A','B','C','D'};
+x_positions = [0.03,0.27,0.505,0.74];
+y_positions = [0.87];  
 k = 1;
 for j = 1:length(y_positions)
     for i = 1:length(x_positions)
@@ -304,21 +141,4 @@ for j = 1:length(y_positions)
         k = k + 1;
     end
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    annotation('textbox',...
-[0.05 0.68 0.08 0.09],...
-'String',{'Monkey 1'},...
-'Rotation',90,...
-'FontWeight','bold',...
-'FontSize',20,...
-'FontName','Helvetica',...
-'EdgeColor',[1 1 1]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- annotation('textbox',...
-[0.05 0.21 0.08 0.09],...
-'String',{'Monkey 2'},...
-'Rotation',90,...
-'FontWeight','bold',...
-'FontSize',20,...
-'FontName','Helvetica',...
-'EdgeColor',[1 1 1]);
