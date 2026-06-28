@@ -37,7 +37,7 @@ for i=1:numTrials
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     mtmp = m(goodAtomsInTF);
     scaling_factor=(3.7/(mean(width_temp)^2));
-    useThesePos=find(mtmp>(amp_temp(i)*scaling_factor));
+    useThesePos=goodAtomsInTF(find(mtmp>(amp_temp(i)*scaling_factor))));
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if ~isempty(useThesePos)
         lengthList{i} = octaveToLengthMultiplier*o(useThesePos);
