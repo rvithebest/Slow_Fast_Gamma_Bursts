@@ -10,18 +10,21 @@
 - Results were consistent across different burst estimators.
 - Simply changing the firing-rate time-constant of the corresponding inhibitory interneuronal population in the noisy WC model, leads to both slower and longer bursts.
 ## Requirements
-- MATLAB R2024b (MathWorks, RRID: SCR_001622)
+- MATLAB R2024b or higher (MathWorks, RRID: SCR_001622)
 - Chronux toolbox (Mitra and Bokil, 2008) (http://chronux.org/, RRID: SCR_005547)
 - Fieldtrip Toolbox ((Oostenveld et al., 2011), RRID: SCR_004849)
-- Download the following the repositories (previous studies from our lab) and add to your path:
-  - https://github.com/avianand8/GammaLengthProjectCodes.git
-  - https://github.com/RKrishnakumaran/NeOLab-WC-models.git
 ## Code Structure
 - Burst_detection_methods: Codes to estimate burst dynamics of slow and fast gamma, using MP, OMP-GEAR and HT.
 - LFP_analysis: Codes for plotting the figures and complete analysis of estimated burst duration and latencies.
-- Model_simulation: Used to simulate non-linear self oscillating WC model to generate slow and fast gamma rhythms
-- Model_analysis: Analysis of simulated LFP dataset (from model)
+- Model_simulation: Used to simulate non-linear self oscillating WC model to generate slow and fast gamma rhythms.
+- Model_analysis: Analysis of simulated LFP dataset (from model).
 ## Data availability
-- The entire LFP-dataset of the two monkeys- Monkey-1 (alpaH) and Monekey-2 (kesariH) is available in the data folder.
+- The entire LFP dataset (decimated version) of the two monkeys- Monkey-1 (alpaH) and Monekey-2 (kesariH) is available in the data folder.
 - Download the data and add to your path, and you can either use the pre-computed burst durations (default) or run the algorithms again.
 - Modify the parent_file_path variable defined in the codes accordingly.
+## References
+  - https://github.com/supratimray/GammaLengthProjectCodes.git
+  - https://www.fuw.edu.pl/~durka/software/mp/
+  - https://github.com/avianand8/GammaLengthProjectCodes.git
+  - https://github.com/RKrishnakumaran/NeOLab-WC-models.git
+
