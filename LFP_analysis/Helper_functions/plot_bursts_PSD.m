@@ -3,7 +3,7 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
     displayFlag=0;
     stimulusPeriodS=[0.25 0.75];
     baselinePeriodS=[-0.5 0];
-    thresholdFraction=0.25;
+    thresholdFraction=0.5;
     num_iterations=120;
     dict_size=2500000;
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -64,7 +64,7 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
         header_temp=header_accumulator{SF_num,ORI_num,counter};
         %%%%%% Slow gamma burst computation %%%%%%
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,slow_gamma_freq);
-        thresholdFactor=sqrt(thresholdFraction*diffPower);
+        thresholdFactor=thresholdFraction*sqrt(diffPower);
         [length_temp_sg,freq_temp_sg,time_center_temp_sg,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,slow_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
         [meanE,freqVals]=getEnergyMP3p1(gabor_temp,header_temp,timeVals);
         E_avg_MP_gatherer{counter}=meanE;
@@ -103,7 +103,7 @@ function plot_bursts_PSD(plotHandles,Monkey_num)
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %%%%%% Fast gamma burst computation %%%%%%
         diffPower=getChangeInPower(data_temp,timeVals,stimulusPeriodS,baselinePeriodS,fast_gamma_freq);
-        thresholdFactor=sqrt(thresholdFraction*diffPower);
+        thresholdFactor=thresholdFraction*sqrt(diffPower);
         [length_temp_fg,freq_temp_fg,time_center_temp_fg,~,~,~]= getBurstLengthMP(data_temp,timeVals,thresholdFactor,displayFlag,stimulusPeriodS,baselinePeriodS,fast_gamma_freq,num_iterations,0.9,dict_size,gabor_temp,header_temp);
         [~,freqVals]=getEnergyMP3p1(gabor_temp,header_temp,timeVals);
         for ii=1:length(length_temp_fg)
